@@ -4,12 +4,41 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Flame, Coins, PlayCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useWallpaper } from "@/contexts/WallpaperContext";
+import { useEffect, useState } from "react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { currentWallpaper } = useWallpaper();
+  const [coinCount, setCoinCount] = useState(150);
+
+  useEffect(() => {
+    // Animate coin counter on mount
+    let start = 0;
+    const end = 150;
+    const duration = 1000;
+    const increment = end / (duration / 16);
+
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= end) {
+        setCoinCount(end);
+        clearInterval(timer);
+      } else {
+        setCoinCount(Math.floor(start));
+      }
+    }, 16);
+
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <div className="p-4 space-y-6">
+    <div 
+      className="p-4 space-y-6 min-h-screen bg-cover bg-center relative"
+      style={{
+        backgroundImage: `linear-gradient(rgba(26, 26, 26, 0.85), rgba(26, 26, 26, 0.85)), url(${currentWallpaper})`,
+      }}
+    >
       {/* Header with rank and avatar */}
       <div className="flex items-center justify-between">
         <div>
@@ -24,7 +53,7 @@ const Dashboard = () => {
       </div>
 
       {/* XP Progress */}
-      <Card className="p-4 space-y-2">
+      <Card className="p-4 space-y-2 bg-card/80 backdrop-blur-sm">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Level 1</span>
           <span className="text-muted-foreground">250 / 1000 XP</span>
@@ -34,14 +63,14 @@ const Dashboard = () => {
 
       {/* Coins and Streak */}
       <div className="grid grid-cols-2 gap-4">
-        <Card className="p-4 flex items-center gap-3">
+        <Card className="p-4 flex items-center gap-3 bg-card/80 backdrop-blur-sm">
           <Coins className="h-6 w-6 text-warning animate-glow" />
           <div>
-            <p className="text-2xl font-bold">150</p>
+            <p className="text-2xl font-bold">{coinCount}</p>
             <p className="text-xs text-muted-foreground">Coins</p>
           </div>
         </Card>
-        <Card className="p-4 flex items-center gap-3">
+        <Card className="p-4 flex items-center gap-3 bg-card/80 backdrop-blur-sm">
           <Flame className="h-6 w-6 text-destructive animate-glow" />
           <div>
             <p className="text-2xl font-bold">5</p>
@@ -61,7 +90,7 @@ const Dashboard = () => {
       </Button>
 
       {/* Quick Stats */}
-      <Card className="p-4">
+      <Card className="p-4 bg-card/80 backdrop-blur-sm">
         <h3 className="font-semibold mb-3">Today's Progress</h3>
         <div className="grid grid-cols-2 gap-4 text-center">
           <div>

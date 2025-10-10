@@ -5,16 +5,29 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useWallpaper } from "@/contexts/WallpaperContext";
 
 const Focus = () => {
   const navigate = useNavigate();
+  const { currentWallpaper } = useWallpaper();
   const [taskName, setTaskName] = useState("");
   const [duration, setDuration] = useState(25);
 
   const durationOptions = [15, 25, 45, 60];
 
+  const handleStart = () => {
+    if (taskName.trim()) {
+      navigate("/focus-session", { state: { taskName, duration } });
+    }
+  };
+
   return (
-    <div className="p-4 space-y-6">
+    <div 
+      className="p-4 space-y-6 min-h-screen bg-cover bg-center relative"
+      style={{
+        backgroundImage: `linear-gradient(rgba(26, 26, 26, 0.85), rgba(26, 26, 26, 0.85)), url(${currentWallpaper})`,
+      }}
+    >
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
@@ -26,7 +39,7 @@ const Focus = () => {
         <h1 className="text-2xl font-bold">Start Focus Session</h1>
       </div>
 
-      <Card className="p-6 space-y-6">
+      <Card className="p-6 space-y-6 bg-card/80 backdrop-blur-sm">
         {/* Task Name Input */}
         <div className="space-y-2">
           <Label htmlFor="task">What are you working on?</Label>
@@ -35,8 +48,10 @@ const Focus = () => {
             placeholder="Enter task name..."
             value={taskName}
             onChange={(e) => setTaskName(e.target.value)}
+            maxLength={100}
             className="bg-background"
           />
+          <p className="text-xs text-muted-foreground">{taskName.length}/100</p>
         </div>
 
         {/* Duration Selection */}
@@ -73,6 +88,7 @@ const Focus = () => {
           size="lg"
           className="w-full"
           disabled={!taskName.trim()}
+          onClick={handleStart}
         >
           Start {duration} Minute Focus
         </Button>
