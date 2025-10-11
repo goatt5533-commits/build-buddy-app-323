@@ -49,10 +49,21 @@ const FocusSession = () => {
 
   useEffect(() => {
     if (isComplete) {
+      const sessionData = {
+        duration: duration,
+        timestamp: new Date().toISOString(),
+        taskName: taskName,
+      };
+      
+      const stored = localStorage.getItem("focusSessions");
+      const sessions = stored ? JSON.parse(stored) : [];
+      sessions.push(sessionData);
+      localStorage.setItem("focusSessions", JSON.stringify(sessions));
+      
       localStorage.setItem("currentTask", taskName);
       navigate("/break");
     }
-  }, [isComplete, navigate, taskName]);
+  }, [isComplete, navigate, taskName, duration]);
 
   const handleCancel = () => {
     cancel();
