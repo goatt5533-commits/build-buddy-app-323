@@ -49,9 +49,10 @@ const FocusSession = () => {
 
   useEffect(() => {
     if (isComplete) {
-      navigate("/break", { state: { taskName, duration } });
+      localStorage.setItem("currentTask", taskName);
+      navigate("/break");
     }
-  }, [isComplete, navigate, taskName, duration]);
+  }, [isComplete, navigate, taskName]);
 
   const handleCancel = () => {
     cancel();
