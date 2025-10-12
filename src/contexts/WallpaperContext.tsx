@@ -12,7 +12,7 @@ const DEFAULT_WALLPAPERS = [
   "https://images.unsplash.com/photo-1557683316-973673baf926",
   "https://images.unsplash.com/photo-1451187580459-43490279c0fa",
   "https://images.unsplash.com/photo-1519681393784-d120267933ba",
-  import wallpaper from "Assets/Wallpaper/HD-wallpaper-life-motivation-study-motivation-quotes.jpg",
+  
 ];
 
 export const WallpaperProvider = ({ children }: { children: ReactNode }) => {
