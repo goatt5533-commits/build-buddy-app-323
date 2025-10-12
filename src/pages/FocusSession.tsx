@@ -5,6 +5,7 @@ import { useTimer } from "@/hooks/useTimer";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Pause, Play, X } from "lucide-react";
 import { useWallpaper } from "@/contexts/WallpaperContext";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,7 @@ const FocusSession = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentWallpaper } = useWallpaper();
+  const { completeSession } = useUserProfile();
   const { taskName, duration } = location.state || { taskName: "Task", duration: 25 };
 
   const {
@@ -49,6 +51,9 @@ const FocusSession = () => {
 
   useEffect(() => {
     if (isComplete) {
+      // Award XP and coins based on session duration
+      completeSession(duration);
+      
       const sessionData = {
         duration: duration,
         timestamp: new Date().toISOString(),
@@ -63,7 +68,7 @@ const FocusSession = () => {
       localStorage.setItem("currentTask", taskName);
       navigate("/break");
     }
-  }, [isComplete, navigate, taskName, duration]);
+  }, [isComplete, navigate, taskName, duration, completeSession]);
 
   const handleCancel = () => {
     cancel();

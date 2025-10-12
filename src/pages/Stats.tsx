@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { useWallpaper } from "@/contexts/WallpaperContext";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 
 interface SessionData {
   duration: number;
@@ -12,56 +13,16 @@ interface SessionData {
 
 const Stats = () => {
   const { currentWallpaper } = useWallpaper();
+  const { profile } = useUserProfile();
   const [sessions, setSessions] = useState<SessionData[]>([]);
-  const [totalTime, setTotalTime] = useState(0);
-  const [streak, setStreak] = useState(0);
 
   useEffect(() => {
     const stored = localStorage.getItem("focusSessions");
     if (stored) {
       const sessionData: SessionData[] = JSON.parse(stored);
       setSessions(sessionData);
-      
-      const total = sessionData.reduce((acc, s) => acc + s.duration, 0);
-      setTotalTime(total);
-      
-      calculateStreak(sessionData);
     }
   }, []);
-
-  const calculateStreak = (sessionData: SessionData[]) => {
-    if (sessionData.length === 0) {
-      setStreak(0);
-      return;
-    }
-
-    const sortedDates = sessionData
-      .map(s => new Date(s.timestamp).toDateString())
-      .filter((date, index, self) => self.indexOf(date) === index)
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-
-    let currentStreak = 1;
-    const today = new Date().toDateString();
-    
-    if (sortedDates[0] !== today && sortedDates[0] !== new Date(Date.now() - 86400000).toDateString()) {
-      setStreak(0);
-      return;
-    }
-
-    for (let i = 0; i < sortedDates.length - 1; i++) {
-      const current = new Date(sortedDates[i]);
-      const next = new Date(sortedDates[i + 1]);
-      const diff = (current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24);
-      
-      if (diff === 1) {
-        currentStreak++;
-      } else {
-        break;
-      }
-    }
-    
-    setStreak(currentStreak);
-  };
 
   const formatTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -106,11 +67,11 @@ const Stats = () => {
 
       <div className="grid grid-cols-2 gap-4">
         <Card className="p-4 text-center bg-card/95 backdrop-blur-sm">
-          <p className="text-3xl font-bold text-primary">{formatTime(totalTime)}</p>
+          <p className="text-3xl font-bold text-primary">{formatTime(profile.totalFocusTime)}</p>
           <p className="text-sm text-muted-foreground">Total Focus Time</p>
         </Card>
         <Card className="p-4 text-center bg-card/95 backdrop-blur-sm">
-          <p className="text-3xl font-bold text-success">{sessions.length}</p>
+          <p className="text-3xl font-bold text-success">{profile.totalSessions}</p>
           <p className="text-sm text-muted-foreground">Sessions Completed</p>
         </Card>
       </div>
@@ -164,13 +125,13 @@ const Stats = () => {
       <Card className="p-4 bg-card/95 backdrop-blur-sm">
         <h3 className="font-semibold mb-3">Achievements</h3>
         <div className="flex flex-wrap gap-2">
-          {streak >= 1 && <Badge variant="secondary">⭐ First Session</Badge>}
-          {sessions.length >= 10 && <Badge variant="secondary">💯 10 Sessions</Badge>}
-          {streak >= 3 && <Badge variant="secondary">🔥 3 Day Streak</Badge>}
-          {streak >= 5 && <Badge variant="secondary">🔥 5 Day Streak</Badge>}
-          {streak >= 7 && <Badge variant="secondary">🔥 7 Day Streak</Badge>}
-          {totalTime >= 60 && <Badge variant="secondary">⏰ 1 Hour Focus</Badge>}
-          {totalTime >= 600 && <Badge variant="secondary">⏰ 10 Hours Focus</Badge>}
+          {profile.streak >= 1 && <Badge variant="secondary">⭐ First Session</Badge>}
+          {profile.totalSessions >= 10 && <Badge variant="secondary">💯 10 Sessions</Badge>}
+          {profile.streak >= 3 && <Badge variant="secondary">🔥 3 Day Streak</Badge>}
+          {profile.streak >= 5 && <Badge variant="secondary">🔥 5 Day Streak</Badge>}
+          {profile.streak >= 7 && <Badge variant="secondary">🔥 7 Day Streak</Badge>}
+          {profile.totalFocusTime >= 60 && <Badge variant="secondary">⏰ 1 Hour Focus</Badge>}
+          {profile.totalFocusTime >= 600 && <Badge variant="secondary">⏰ 10 Hours Focus</Badge>}
         </div>
       </Card>
     </div>

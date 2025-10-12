@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useWallpaper } from "@/contexts/WallpaperContext";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useState, useRef } from "react";
 import { Upload, Trash2, User, Bell, Volume2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -27,6 +28,7 @@ const defaultWallpapers = [
 
 const Settings = () => {
   const { currentWallpaper, setWallpaper } = useWallpaper();
+  const { profile, resetProfile } = useUserProfile();
   const [notifications, setNotifications] = useState(false);
   const [soundEffects, setSoundEffects] = useState(true);
   const { toast } = useToast();
@@ -51,7 +53,7 @@ const Settings = () => {
   const handleDataReset = () => {
     localStorage.removeItem("focusSessions");
     localStorage.removeItem("memories");
-    localStorage.removeItem("userProgress");
+    resetProfile();
     toast({
       title: "Data Reset",
       description: "All your data has been cleared",
@@ -76,12 +78,13 @@ const Settings = () => {
           <h3 className="font-semibold">Profile</h3>
         </div>
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-2xl">
-            🎯
+          <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-2xl font-bold">
+            {profile.rank.charAt(0)}
           </div>
           <div>
-            <p className="font-medium">Rank: Apprentice</p>
-            <p className="text-sm text-muted-foreground">Level 1</p>
+            <p className="font-medium">Rank: {profile.rank}</p>
+            <p className="text-sm text-muted-foreground">Level {profile.level}</p>
+            <p className="text-sm text-muted-foreground">{profile.xp} XP • {profile.coins} Coins</p>
           </div>
         </div>
       </Card>
