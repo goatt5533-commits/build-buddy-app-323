@@ -28,17 +28,22 @@ const INITIAL_PROFILE: UserProfile = {
   coins: 0,
   streak: 0,
   lastSessionDate: null,
-  rank: "Apprentice",
+  rank: "Wanderer",
   totalFocusTime: 0,
   totalSessions: 0,
 };
 
-const XP_PER_LEVEL = 1000;
+const XP_PER_LEVEL = 100;
 const RANKS = [
-  { name: "Apprentice", minLevel: 1 },
-  { name: "Knight", minLevel: 5 },
-  { name: "Master", minLevel: 10 },
-  { name: "Legend", minLevel: 20 },
+  { name: "Wanderer", minLevel: 1 },
+  { name: "Awakened", minLevel: 5 },
+  { name: "Intent", minLevel: 10 },
+  { name: "Disciplined", minLevel: 25 },
+  { name: "Diligent", minLevel: 50 },
+  { name: "Unshakened", minLevel: 75 },
+  { name: "Visionery", minLevel: 100 },
+  { name: "Liberated", minLevel: 150 },
+  { name: "Transcendent", minLevel: 200 },
 ];
 
 const calculateLevel = (xp: number): number => {
