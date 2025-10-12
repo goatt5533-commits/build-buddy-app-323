@@ -37,13 +37,13 @@ const XP_PER_LEVEL = 100;
 const RANKS = [
   { name: "Wanderer", minLevel: 1 },
   { name: "Awakened", minLevel: 5 },
-  { name: "Intent", minLevel: 10 },
-  { name: "Disciplined", minLevel: 25 },
-  { name: "Diligent", minLevel: 50 },
-  { name: "Unshakened", minLevel: 75 },
-  { name: "Visionery", minLevel: 100 },
-  { name: "Liberated", minLevel: 150 },
-  { name: "Transcendent", minLevel: 200 },
+  { name: "Intent", minLevel: 15 },
+  { name: "Disciplined", minLevel: 215 },
+  { name: "Diligent", minLevel: 376 },
+  { name: "Unshakened", minLevel: 543 },
+  { name: "Visionery", minLevel: 770 },
+  { name: "Liberated", minLevel: 1045 },
+  { name: "Transcendent", minLevel: 1380 },
 ];
 
 const calculateLevel = (xp: number): number => {
@@ -120,8 +120,8 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const completeSession = (durationMinutes: number) => {
-    // Award XP based on duration: 10 XP per minute
-    const xpEarned = durationMinutes * 10;
+    // Award XP based on duration: 2 XP per minute
+    const xpEarned = durationMinutes * 2;
     // Award coins based on duration: 2 coins per minute
     const coinsEarned = durationMinutes * 2;
 
