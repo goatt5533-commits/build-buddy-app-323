@@ -2,10 +2,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { useWallpaper } from "@/contexts/WallpaperContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import { useMusic, playlists } from "@/contexts/MusicContext";
 import { useState, useRef } from "react";
-import { Upload, Trash2, User, Bell, Volume2 } from "lucide-react";
+import { Upload, Trash2, User, Bell, Volume2, Music, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -29,8 +31,14 @@ const defaultWallpapers = [
 const Settings = () => {
   const { currentWallpaper, setWallpaper } = useWallpaper();
   const { profile, resetProfile } = useUserProfile();
-  const [notifications, setNotifications] = useState(false);
-  const [soundEffects, setSoundEffects] = useState(true);
+  const { currentPlaylist, volume, setPlaylist, setVolume } = useMusic();
+  const [notifications, setNotifications] = useState(() => {
+    return localStorage.getItem("notifications") === "true";
+  });
+  const [soundEffects, setSoundEffects] = useState(() => {
+    const saved = localStorage.getItem("soundEffects");
+    return saved === null ? true : saved === "true";
+  });
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,6 +56,44 @@ const Settings = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleNotificationToggle = async (checked: boolean) => {
+    if (checked) {
+      if ("Notification" in window) {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          setNotifications(true);
+          localStorage.setItem("notifications", "true");
+          toast({
+            title: "Notifications Enabled",
+            description: "You'll receive focus session reminders",
+          });
+        } else {
+          setNotifications(false);
+          localStorage.setItem("notifications", "false");
+          toast({
+            title: "Permission Denied",
+            description: "Please enable notifications in your browser settings",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Not Supported",
+          description: "Your browser doesn't support notifications",
+          variant: "destructive",
+        });
+      }
+    } else {
+      setNotifications(false);
+      localStorage.setItem("notifications", "false");
+    }
+  };
+
+  const handleSoundToggle = (checked: boolean) => {
+    setSoundEffects(checked);
+    localStorage.setItem("soundEffects", checked.toString());
   };
 
   const handleDataReset = () => {
@@ -122,6 +168,56 @@ const Settings = () => {
       </Card>
 
       <Card className="p-4 bg-card/95 backdrop-blur-sm space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Music className="h-5 w-5 text-primary" />
+          <h3 className="font-semibold">Music</h3>
+        </div>
+        
+        <div className="space-y-3">
+          {playlists.map((playlist) => (
+            <div
+              key={playlist.id}
+              onClick={() => {
+                setPlaylist(playlist.id);
+                toast({
+                  title: "Music Updated",
+                  description: `Selected: ${playlist.name}`,
+                });
+              }}
+              className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                currentPlaylist === playlist.id
+                  ? "border-primary bg-primary/10"
+                  : "border-border hover:border-primary/50"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">{playlist.name}</p>
+                  <p className="text-xs text-muted-foreground">{playlist.description}</p>
+                </div>
+                {currentPlaylist === playlist.id && (
+                  <Check className="h-5 w-5 text-primary" />
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {currentPlaylist !== "none" && (
+          <div className="pt-2">
+            <Label className="text-sm">Volume: {volume}%</Label>
+            <Slider
+              value={[volume]}
+              onValueChange={(value) => setVolume(value[0])}
+              max={100}
+              step={1}
+              className="mt-2"
+            />
+          </div>
+        )}
+      </Card>
+
+      <Card className="p-4 bg-card/95 backdrop-blur-sm space-y-4">
         <h3 className="font-semibold">Preferences</h3>
         
         <div className="flex items-center justify-between">
@@ -132,7 +228,7 @@ const Settings = () => {
           <Switch
             id="notifications"
             checked={notifications}
-            onCheckedChange={setNotifications}
+            onCheckedChange={handleNotificationToggle}
           />
         </div>
 
@@ -144,7 +240,7 @@ const Settings = () => {
           <Switch
             id="sound"
             checked={soundEffects}
-            onCheckedChange={setSoundEffects}
+            onCheckedChange={handleSoundToggle}
           />
         </div>
       </Card>

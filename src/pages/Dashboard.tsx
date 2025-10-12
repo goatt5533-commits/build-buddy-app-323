@@ -70,9 +70,12 @@ const Dashboard = () => {
             {profile.rank}
           </Badge>
         </div>
-        <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
+        <button 
+          onClick={() => navigate("/settings")}
+          className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold hover:bg-primary/90 transition-colors cursor-pointer"
+        >
           {profile.rank.charAt(0)}
-        </div>
+        </button>
       </div>
 
       {/* XP Progress */}
