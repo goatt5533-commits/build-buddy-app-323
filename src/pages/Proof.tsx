@@ -186,11 +186,11 @@ const Proof = () => {
           <div className="flex justify-center gap-8 text-2xl font-bold">
             <div className="flex items-center gap-2">
               <Sparkles className="h-8 w-8 text-primary" />
-              <span>+50 XP</span>
+              <span>+XP</span>
             </div>
             <div className="flex items-center gap-2">
               <Coins className="h-8 w-8 text-warning" />
-              <span>+10 Coins</span>
+              <span>+Coins</span>
             </div>
           </div>
 
