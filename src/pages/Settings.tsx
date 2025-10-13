@@ -6,8 +6,10 @@ import { Slider } from "@/components/ui/slider";
 import { useWallpaper } from "@/contexts/WallpaperContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useMusic, playlists } from "@/contexts/MusicContext";
+import { useAppBlock } from "@/contexts/AppBlockContext";
 import { useState, useRef } from "react";
-import { Upload, Trash2, User, Bell, Volume2, Music, Check } from "lucide-react";
+import { Upload, Trash2, User, Bell, Volume2, Music, Check, Shield, Plus, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -32,9 +34,11 @@ const Settings = () => {
   const { currentWallpaper, setWallpaper } = useWallpaper();
   const { profile, resetProfile } = useUserProfile();
   const { currentPlaylist, volume, setPlaylist, setVolume } = useMusic();
+  const { blockingEnabled, whitelist, addToWhitelist, removeFromWhitelist, toggleBlocking } = useAppBlock();
   const [notifications, setNotifications] = useState(() => {
     return localStorage.getItem("notifications") === "true";
   });
+  const [newWhitelistApp, setNewWhitelistApp] = useState("");
   const [soundEffects, setSoundEffects] = useState(() => {
     const saved = localStorage.getItem("soundEffects");
     return saved === null ? true : saved === "true";
@@ -104,6 +108,25 @@ const Settings = () => {
       title: "Data Reset",
       description: "All your data has been cleared",
       variant: "destructive",
+    });
+  };
+
+  const handleAddWhitelistApp = () => {
+    if (newWhitelistApp.trim()) {
+      addToWhitelist(newWhitelistApp.trim());
+      setNewWhitelistApp("");
+      toast({
+        title: "App Whitelisted",
+        description: `${newWhitelistApp} won't be blocked`,
+      });
+    }
+  };
+
+  const handleRemoveWhitelistApp = (app: string) => {
+    removeFromWhitelist(app);
+    toast({
+      title: "App Removed",
+      description: `${app} removed from whitelist`,
     });
   };
 
@@ -242,6 +265,52 @@ const Settings = () => {
             checked={soundEffects}
             onCheckedChange={handleSoundToggle}
           />
+        </div>
+      </Card>
+
+      <Card className="p-4 bg-card/95 backdrop-blur-sm space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Shield className="h-5 w-5 text-primary" />
+          <h3 className="font-semibold">App Blocking</h3>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <Label htmlFor="blocking">Enable App Blocking</Label>
+          <Switch
+            id="blocking"
+            checked={blockingEnabled}
+            onCheckedChange={toggleBlocking}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm">Whitelist (Apps that won't be blocked)</Label>
+          <div className="flex gap-2">
+            <Input
+              placeholder="e.g., youtube.com"
+              value={newWhitelistApp}
+              onChange={(e) => setNewWhitelistApp(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAddWhitelistApp()}
+            />
+            <Button size="icon" onClick={handleAddWhitelistApp}>
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="space-y-2 mt-3">
+            {whitelist.map((app) => (
+              <div key={app} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                <span className="text-sm">{app}</span>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => handleRemoveWhitelistApp(app)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
       </Card>
 

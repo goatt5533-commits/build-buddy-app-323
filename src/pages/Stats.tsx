@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { useWallpaper } from "@/contexts/WallpaperContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import { useAppBlock } from "@/contexts/AppBlockContext";
 
 interface SessionData {
   duration: number;
@@ -14,6 +15,7 @@ interface SessionData {
 const Stats = () => {
   const { currentWallpaper } = useWallpaper();
   const { profile } = useUserProfile();
+  const { distractionCount } = useAppBlock();
   const [sessions, setSessions] = useState<SessionData[]>([]);
 
   useEffect(() => {
