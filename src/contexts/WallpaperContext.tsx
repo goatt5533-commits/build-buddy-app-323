@@ -1,4 +1,10 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import wallpaper1 from "@/Assets/Wallpaper/55fce50581da2a61e4ed28680c7d0714.jpg";
+import wallpaper2 from "@/Assets/Wallpaper/Abstract-geometric-iPhone-wallpaper-ieditwalls-iDownloadBlog-5.png";
+import wallpaper3 from "@/Assets/Wallpaper/Abstract-geometric-iPhone-wallpaper-ieditwalls-iDownloadBlog-7.png";
+import wallpaper4 from "@/Assets/Wallpaper/HD-wallpaper-life-motivation-study-motivation-quotes.jpg";
+import wallpaper5 from "@/Assets/Wallpaper/HD-wallpaper-tumblr-metropolis-metropolitan-area-city-cityscape-urban-area-realistic-city.jpg";
+import wallpaper6 from "@/Assets/Wallpaper/pexels-george-desipris-2055100.jpg";
 
 interface WallpaperContextType {
   currentWallpaper: string;
@@ -9,10 +15,12 @@ interface WallpaperContextType {
 const WallpaperContext = createContext<WallpaperContextType | undefined>(undefined);
 
 const DEFAULT_WALLPAPERS = [
-  "https://images.unsplash.com/photo-1557683316-973673baf926",
-  "https://images.unsplash.com/photo-1451187580459-43490279c0fa",
-  "https://images.unsplash.com/photo-1519681393784-d120267933ba",
-  "https://images.unsplash.com/photo-1579546929518-9e396f3cc809",
+  wallpaper1,
+  wallpaper2,
+  wallpaper3,
+  wallpaper4,
+  wallpaper5,
+  wallpaper6,
 ];
 
 export const WallpaperProvider = ({ children }: { children: ReactNode }) => {

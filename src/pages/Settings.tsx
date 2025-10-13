@@ -23,15 +23,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-const defaultWallpapers = [
-  "https://images.unsplash.com/photo-1557683316-973673baf926",
-  "https://images.unsplash.com/photo-1579546929518-9e396f3cc809",
-  "https://images.unsplash.com/photo-1451187580459-43490279c0fa",
-  "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a",
-];
-
 const Settings = () => {
-  const { currentWallpaper, setWallpaper } = useWallpaper();
+  const { currentWallpaper, setWallpaper, defaultWallpapers } = useWallpaper();
   const { profile, resetProfile } = useUserProfile();
   const { currentPlaylist, volume, setPlaylist, setVolume } = useMusic();
   const { blockingEnabled, whitelist, addToWhitelist, removeFromWhitelist, toggleBlocking } = useAppBlock();
