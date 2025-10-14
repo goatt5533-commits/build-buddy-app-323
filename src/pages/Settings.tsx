@@ -8,7 +8,7 @@ import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useMusic, playlists } from "@/contexts/MusicContext";
 import { useAppBlock } from "@/contexts/AppBlockContext";
 import { useState, useRef } from "react";
-import { Upload, Trash2, User, Bell, Volume2, Music, Check, Shield, Plus, X } from "lucide-react";
+import { Upload, Trash2, User, Bell, Volume2, Music, Check, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -27,11 +27,10 @@ const Settings = () => {
   const { currentWallpaper, setWallpaper, defaultWallpapers } = useWallpaper();
   const { profile, resetProfile } = useUserProfile();
   const { currentPlaylist, volume, setPlaylist, setVolume } = useMusic();
-  const { blockingEnabled, whitelist, addToWhitelist, removeFromWhitelist, toggleBlocking } = useAppBlock();
+  const { blockingEnabled, distractionCount, toggleBlocking, resetDistractionCount } = useAppBlock();
   const [notifications, setNotifications] = useState(() => {
     return localStorage.getItem("notifications") === "true";
   });
-  const [newWhitelistApp, setNewWhitelistApp] = useState("");
   const [soundEffects, setSoundEffects] = useState(() => {
     const saved = localStorage.getItem("soundEffects");
     return saved === null ? true : saved === "true";
@@ -97,29 +96,11 @@ const Settings = () => {
     localStorage.removeItem("focusSessions");
     localStorage.removeItem("memories");
     resetProfile();
+    resetDistractionCount();
     toast({
       title: "Data Reset",
       description: "All your data has been cleared",
       variant: "destructive",
-    });
-  };
-
-  const handleAddWhitelistApp = () => {
-    if (newWhitelistApp.trim()) {
-      addToWhitelist(newWhitelistApp.trim());
-      setNewWhitelistApp("");
-      toast({
-        title: "App Whitelisted",
-        description: `${newWhitelistApp} won't be blocked`,
-      });
-    }
-  };
-
-  const handleRemoveWhitelistApp = (app: string) => {
-    removeFromWhitelist(app);
-    toast({
-      title: "App Removed",
-      description: `${app} removed from whitelist`,
     });
   };
 
@@ -264,11 +245,16 @@ const Settings = () => {
       <Card className="p-4 bg-card/95 backdrop-blur-sm space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <Shield className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold">App Blocking</h3>
+          <h3 className="font-semibold">Focus Mode</h3>
         </div>
         
         <div className="flex items-center justify-between">
-          <Label htmlFor="blocking">Enable App Blocking</Label>
+          <div className="flex-1">
+            <Label htmlFor="blocking">Distraction Tracking</Label>
+            <p className="text-xs text-muted-foreground mt-1">
+              Track when you leave the app during focus sessions
+            </p>
+          </div>
           <Switch
             id="blocking"
             checked={blockingEnabled}
@@ -276,34 +262,14 @@ const Settings = () => {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label className="text-sm">Whitelist (Apps that won't be blocked)</Label>
-          <div className="flex gap-2">
-            <Input
-              placeholder="e.g., youtube.com"
-              value={newWhitelistApp}
-              onChange={(e) => setNewWhitelistApp(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleAddWhitelistApp()}
-            />
-            <Button size="icon" onClick={handleAddWhitelistApp}>
-              <Plus className="h-4 w-4" />
-            </Button>
+        <div className="p-3 rounded-lg bg-muted/50">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Total Distractions</span>
+            <span className="text-lg font-bold text-destructive">{distractionCount}</span>
           </div>
-          
-          <div className="space-y-2 mt-3">
-            {whitelist.map((app) => (
-              <div key={app} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-                <span className="text-sm">{app}</span>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => handleRemoveWhitelistApp(app)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Times you switched away during focus sessions
+          </p>
         </div>
       </Card>
 
