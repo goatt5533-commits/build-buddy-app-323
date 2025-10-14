@@ -6,9 +6,9 @@ import { Slider } from "@/components/ui/slider";
 import { useWallpaper } from "@/contexts/WallpaperContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useMusic, playlists } from "@/contexts/MusicContext";
-import { useAppBlock } from "@/contexts/AppBlockContext";
+import { useAppBlock, COMMON_APPS } from "@/contexts/AppBlockContext";
 import { useState, useRef } from "react";
-import { Upload, Trash2, User, Bell, Volume2, Music, Check, Shield } from "lucide-react";
+import { Upload, Trash2, User, Bell, Volume2, Music, Check, Shield, Plus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -27,10 +27,11 @@ const Settings = () => {
   const { currentWallpaper, setWallpaper, defaultWallpapers } = useWallpaper();
   const { profile, resetProfile } = useUserProfile();
   const { currentPlaylist, volume, setPlaylist, setVolume } = useMusic();
-  const { blockingEnabled, distractionCount, toggleBlocking, resetDistractionCount } = useAppBlock();
+  const { blockingEnabled, whitelist, distractionCount, addToWhitelist, removeFromWhitelist, toggleBlocking, resetDistractionCount } = useAppBlock();
   const [notifications, setNotifications] = useState(() => {
     return localStorage.getItem("notifications") === "true";
   });
+  const [customAppName, setCustomAppName] = useState("");
   const [soundEffects, setSoundEffects] = useState(() => {
     const saved = localStorage.getItem("soundEffects");
     return saved === null ? true : saved === "true";
@@ -102,6 +103,33 @@ const Settings = () => {
       description: "All your data has been cleared",
       variant: "destructive",
     });
+  };
+
+  const handleToggleApp = (appId: string) => {
+    if (whitelist.includes(appId)) {
+      removeFromWhitelist(appId);
+      toast({
+        title: "App Removed",
+        description: "This app will now count as a distraction",
+      });
+    } else {
+      addToWhitelist(appId);
+      toast({
+        title: "App Whitelisted",
+        description: "This app won't count as a distraction",
+      });
+    }
+  };
+
+  const handleAddCustomApp = () => {
+    if (customAppName.trim()) {
+      addToWhitelist(customAppName.trim());
+      setCustomAppName("");
+      toast({
+        title: "App Added",
+        description: `${customAppName} added to whitelist`,
+      });
+    }
   };
 
   return (
@@ -271,6 +299,82 @@ const Settings = () => {
             Times you switched away during focus sessions
           </p>
         </div>
+
+        {blockingEnabled && (
+          <div className="space-y-3 pt-2 border-t">
+            <div>
+              <Label className="text-sm font-medium">Allowed Apps</Label>
+              <p className="text-xs text-muted-foreground mt-1 mb-3">
+                Select apps that won't count as distractions during focus sessions
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              {COMMON_APPS.map((app) => (
+                <div
+                  key={app.id}
+                  onClick={() => handleToggleApp(app.id)}
+                  className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                    whitelist.includes(app.id)
+                      ? "border-primary bg-primary/10"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{app.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{app.name}</p>
+                    </div>
+                    {whitelist.includes(app.id) && (
+                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-2">
+              <Label className="text-sm font-medium">Add Custom App</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  placeholder="Enter app name"
+                  value={customAppName}
+                  onChange={(e) => setCustomAppName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddCustomApp()}
+                />
+                <Button size="icon" onClick={handleAddCustomApp}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {whitelist.filter(app => !COMMON_APPS.find(ca => ca.id === app)).length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Custom Apps</Label>
+                {whitelist
+                  .filter(app => !COMMON_APPS.find(ca => ca.id === app))
+                  .map((app) => (
+                    <div key={app} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                      <span className="text-sm">{app}</span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => {
+                          removeFromWhitelist(app);
+                          toast({
+                            title: "App Removed",
+                            description: `${app} removed from whitelist`,
+                          });
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+        )}
       </Card>
 
       <Card className="p-4 bg-card/95 backdrop-blur-sm">
