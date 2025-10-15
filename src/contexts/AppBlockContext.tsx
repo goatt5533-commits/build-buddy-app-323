@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { App as CapacitorApp } from '@capacitor/app';
 
 interface AppBlockContextType {
   isBlocking: boolean;
@@ -16,7 +17,6 @@ interface AppBlockContextType {
 
 const AppBlockContext = createContext<AppBlockContextType | undefined>(undefined);
 
-// Common mobile apps that users might want to whitelist
 export const COMMON_APPS = [
   { id: "spotify", name: "Spotify", icon: "🎵" },
   { id: "apple-music", name: "Apple Music", icon: "🎵" },
@@ -49,63 +49,29 @@ export const AppBlockProvider = ({ children }: { children: ReactNode }) => {
     return saved ? parseInt(saved) : 0;
   });
 
-  useEffect(() => {
-    localStorage.setItem("appWhitelist", JSON.stringify(whitelist));
-  }, [whitelist]);
+  useEffect(() => { localStorage.setItem("appWhitelist", JSON.stringify(whitelist)); }, [whitelist]);
+  useEffect(() => { localStorage.setItem("distractionCount", distractionCount.toString()); }, [distractionCount]);
+  useEffect(() => { localStorage.setItem("appBlockingEnabled", blockingEnabled.toString()); }, [blockingEnabled]);
 
-  useEffect(() => {
-    localStorage.setItem("distractionCount", distractionCount.toString());
-  }, [distractionCount]);
+  const addToWhitelist = (app: string) => { if (!whitelist.includes(app)) setWhitelist([...whitelist, app]); };
+  const removeFromWhitelist = (app: string) => { setWhitelist(whitelist.filter(item => item !== app)); };
+  const toggleBlocking = (enabled: boolean) => { setBlockingEnabled(enabled); };
+  const startBlocking = () => { setIsBlocking(true); };
+  const stopBlocking = () => { setIsBlocking(false); };
+  const recordDistraction = () => { setDistractionCount(prev => prev + 1); };
+  const resetDistractionCount = () => { setDistractionCount(0); };
 
-  useEffect(() => {
-    localStorage.setItem("appBlockingEnabled", blockingEnabled.toString());
-  }, [blockingEnabled]);
-
-  const addToWhitelist = (app: string) => {
-    if (!whitelist.includes(app)) {
-      setWhitelist([...whitelist, app]);
-    }
-  };
-
-  const removeFromWhitelist = (app: string) => {
-    setWhitelist(whitelist.filter(item => item !== app));
-  };
-
-  const toggleBlocking = (enabled: boolean) => {
-    setBlockingEnabled(enabled);
-  };
-
-  const startBlocking = () => {
-    setIsBlocking(true);
-  };
-
-  const stopBlocking = () => {
-    setIsBlocking(false);
-  };
-
-  const recordDistraction = () => {
-    setDistractionCount(prev => prev + 1);
-  };
-
-  const resetDistractionCount = () => {
-    setDistractionCount(0);
-  };
-
-  // Monitor visibility changes during blocking
+  // APK / Android native visibility detection
   useEffect(() => {
     if (!isBlocking || !blockingEnabled) return;
 
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
+    const listener = CapacitorApp.addListener("appStateChange", (state) => {
+      if (!state.isActive) {
         recordDistraction();
       }
-    };
+    });
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
+    return () => { listener.remove(); };
   }, [isBlocking, blockingEnabled]);
 
   return (
@@ -131,8 +97,6 @@ export const AppBlockProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAppBlock = () => {
   const context = useContext(AppBlockContext);
-  if (!context) {
-    throw new Error("useAppBlock must be used within AppBlockProvider");
-  }
+  if (!context) throw new Error("useAppBlock must be used within AppBlockProvider");
   return context;
 };
