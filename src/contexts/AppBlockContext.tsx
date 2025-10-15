@@ -65,13 +65,18 @@ export const AppBlockProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!isBlocking || !blockingEnabled) return;
 
-    const listener = CapacitorApp.addListener("appStateChange", (state) => {
+    let listenerHandle: any;
+    CapacitorApp.addListener("appStateChange", (state) => {
       if (!state.isActive) {
         recordDistraction();
       }
+    }).then(handle => {
+      listenerHandle = handle;
     });
 
-    return () => { listener.remove(); };
+    return () => { 
+      if (listenerHandle) listenerHandle.remove(); 
+    };
   }, [isBlocking, blockingEnabled]);
 
   return (
