@@ -16,6 +16,7 @@ import Proof from "./pages/Proof";
 import Stats from "./pages/Stats";
 import Memories from "./pages/Memories";
 import Settings from "./pages/Settings";
+import Shop from "./pages/Shop";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
                   <Route path="/proof" element={<Layout><Proof /></Layout>} />
                   <Route path="/stats" element={<Layout><Stats /></Layout>} />
                   <Route path="/memories" element={<Layout><Memories /></Layout>} />
+                  <Route path="/shop" element={<Layout><Shop /></Layout>} />
                   <Route path="/settings" element={<Layout><Settings /></Layout>} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />

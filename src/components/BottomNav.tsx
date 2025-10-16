@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, BarChart3, Images, Settings } from "lucide-react";
+import { Home, BarChart3, Images, Settings, ShoppingBag } from "lucide-react";
 
 const BottomNav = () => {
   const location = useLocation();
@@ -7,6 +7,7 @@ const BottomNav = () => {
   const navItems = [
     { icon: Home, label: "Dashboard", path: "/" },
     { icon: BarChart3, label: "Stats", path: "/stats" },
+    { icon: ShoppingBag, label: "Shop", path: "/shop" },
     { icon: Images, label: "Memories", path: "/memories" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];

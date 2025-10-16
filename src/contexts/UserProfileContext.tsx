@@ -13,11 +13,12 @@ export interface UserProfile {
 
 interface UserProfileContextType {
   profile: UserProfile;
-  addXP: (amount: number) => void;
+  addXP: (amount: number, applyBoost?: boolean) => void;
   addCoins: (amount: number) => void;
   updateStreak: () => void;
   resetProfile: () => void;
   completeSession: (durationMinutes: number) => void;
+  getActiveXPMultiplier: () => number;
 }
 
 const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);
@@ -69,9 +70,24 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("userProfile", JSON.stringify(profile));
   }, [profile]);
 
-  const addXP = (amount: number) => {
+  const getActiveXPMultiplier = (): number => {
+    const activeBoosts = localStorage.getItem('activeBoosts');
+    if (!activeBoosts) return 1;
+    
+    const boosts = JSON.parse(activeBoosts);
+    const now = Date.now();
+    const validBoosts = boosts.filter((boost: any) => boost.expiresAt > now);
+    
+    if (validBoosts.length === 0) return 1;
+    return Math.max(...validBoosts.map((b: any) => b.multiplier));
+  };
+
+  const addXP = (amount: number, applyBoost: boolean = true) => {
+    const multiplier = applyBoost ? getActiveXPMultiplier() : 1;
+    const finalAmount = amount * multiplier;
+    
     setProfile((prev) => {
-      const newXP = prev.xp + amount;
+      const newXP = prev.xp + finalAmount;
       const newLevel = calculateLevel(newXP);
       const newRank = calculateRank(newLevel);
       return {
@@ -120,8 +136,10 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const completeSession = (durationMinutes: number) => {
-    // Award XP based on duration: 2 XP per minute
-    const xpEarned = durationMinutes * 2;
+    // Award XP based on duration: 2 XP per minute with boost multiplier
+    const baseXP = durationMinutes * 2;
+    const multiplier = getActiveXPMultiplier();
+    const xpEarned = baseXP * multiplier;
     // Award coins based on duration: 2 coins per minute
     const coinsEarned = durationMinutes * 2;
 
@@ -178,6 +196,7 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
         updateStreak,
         resetProfile,
         completeSession,
+        getActiveXPMultiplier,
       }}
     >
       {children}
