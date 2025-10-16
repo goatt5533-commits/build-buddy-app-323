@@ -4,7 +4,7 @@ export const notifyFocus = async () => {
   await LocalNotifications.schedule({
     notifications: [
       {
-        title: "FocusForge Reminder",
+        title: "ForgeFocus Reminder",
         body: "Time to focus! Avoid doom scrolling.",
         id: Date.now(),
         schedule: { at: new Date(Date.now() + 1000) },
