@@ -13,10 +13,11 @@ interface ShopItem {
   description: string;
   price: number;
   icon: any;
-  type: 'boost' | 'cosmetic';
+  type: 'boost' | 'utility' | 'conversion';
   effect?: {
     duration?: number; // in minutes
     multiplier?: number;
+    xpAmount?: number;
   };
 }
 
@@ -49,37 +50,48 @@ const SHOP_ITEMS: ShopItem[] = [
     effect: { duration: 30, multiplier: 3 }
   },
   {
-    id: 'bronze_medal',
-    name: 'Bronze Medal',
-    description: 'A badge of honor for your dedication',
+    id: 'streak_freeze',
+    name: 'Streak Freeze',
+    description: 'Protects your streak for one missed day',
+    price: 100,
+    icon: Award,
+    type: 'utility'
+  },
+  {
+    id: 'coins_to_xp_50',
+    name: '10 XP',
+    description: 'Convert 50 coins to 10 XP',
     price: 50,
-    icon: Award,
-    type: 'cosmetic'
-  },
-  {
-    id: 'silver_medal',
-    name: 'Silver Medal',
-    description: 'A prestigious achievement medal',
-    price: 150,
-    icon: Award,
-    type: 'cosmetic'
-  },
-  {
-    id: 'gold_medal',
-    name: 'Gold Medal',
-    description: 'The ultimate symbol of excellence',
-    price: 300,
     icon: Star,
-    type: 'cosmetic'
+    type: 'conversion',
+    effect: { xpAmount: 10 }
+  },
+  {
+    id: 'coins_to_xp_100',
+    name: '20 XP',
+    description: 'Convert 100 coins to 20 XP',
+    price: 100,
+    icon: Star,
+    type: 'conversion',
+    effect: { xpAmount: 20 }
+  },
+  {
+    id: 'coins_to_xp_250',
+    name: '50 XP',
+    description: 'Convert 250 coins to 50 XP',
+    price: 250,
+    icon: Star,
+    type: 'conversion',
+    effect: { xpAmount: 50 }
   }
 ];
 
 const Shop = () => {
   const { currentWallpaper } = useWallpaper();
-  const { profile, addCoins } = useUserProfile();
-  const [ownedItems, setOwnedItems] = useState<string[]>(() => {
-    const saved = localStorage.getItem('ownedShopItems');
-    return saved ? JSON.parse(saved) : [];
+  const { profile, addCoins, addXP, addStreakFreeze } = useUserProfile();
+  const [streakFreezes, setStreakFreezes] = useState<number>(() => {
+    const saved = localStorage.getItem('streakFreezes');
+    return saved ? parseInt(saved) : 0;
   });
   const [activeBoosts, setActiveBoosts] = useState<any[]>(() => {
     const saved = localStorage.getItem('activeBoosts');
@@ -87,8 +99,8 @@ const Shop = () => {
   });
 
   useEffect(() => {
-    localStorage.setItem('ownedShopItems', JSON.stringify(ownedItems));
-  }, [ownedItems]);
+    localStorage.setItem('streakFreezes', streakFreezes.toString());
+  }, [streakFreezes]);
 
   useEffect(() => {
     localStorage.setItem('activeBoosts', JSON.stringify(activeBoosts));
@@ -140,15 +152,22 @@ const Shop = () => {
         title: "Boost Activated! 🚀",
         description: `${item.name} is now active for ${item.effect.duration} minutes!`,
       });
-    } else {
-      // Add to owned items
-      if (!ownedItems.includes(item.id)) {
-        setOwnedItems(prev => [...prev, item.id]);
-      }
+    } else if (item.type === 'utility') {
+      // Add streak freeze
+      setStreakFreezes(prev => prev + 1);
+      addStreakFreeze();
 
       toast({
-        title: "Purchase Successful! 🎉",
-        description: `You've acquired ${item.name}!`,
+        title: "Streak Freeze Acquired! ❄️",
+        description: `You now have ${streakFreezes + 1} streak freeze(s). It will automatically protect your streak if you miss a day.`,
+      });
+    } else if (item.type === 'conversion' && item.effect?.xpAmount) {
+      // Convert coins to XP
+      addXP(item.effect.xpAmount, false);
+
+      toast({
+        title: "XP Gained! ⭐",
+        description: `Converted coins to ${item.effect.xpAmount} XP!`,
       });
     }
   };
@@ -239,20 +258,21 @@ const Shop = () => {
             </div>
           </div>
 
-          {/* Medals Section */}
+          {/* Utilities Section */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">Medals & Achievements</h2>
+            <h2 className="text-2xl font-bold text-foreground">Utilities</h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              {SHOP_ITEMS.filter(item => item.type === 'cosmetic').map((item) => {
+              {SHOP_ITEMS.filter(item => item.type === 'utility').map((item) => {
                 const Icon = item.icon;
-                const isOwned = ownedItems.includes(item.id);
                 return (
-                  <Card key={item.id} className={`hover:border-primary transition-colors ${isOwned ? 'bg-primary/5' : ''}`}>
+                  <Card key={item.id} className="hover:border-primary transition-colors">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <Icon className={`h-5 w-5 ${isOwned ? 'text-primary' : 'text-muted-foreground'}`} />
+                        <Icon className="h-5 w-5 text-primary" />
                         {item.name}
-                        {isOwned && <Badge variant="secondary">Owned</Badge>}
+                        {item.type === 'utility' && streakFreezes > 0 && (
+                          <Badge variant="secondary">{streakFreezes} owned</Badge>
+                        )}
                       </CardTitle>
                       <CardDescription>{item.description}</CardDescription>
                     </CardHeader>
@@ -264,10 +284,46 @@ const Shop = () => {
                         </div>
                         <Button 
                           onClick={() => handlePurchase(item)}
-                          disabled={profile.coins < item.price || isOwned}
+                          disabled={profile.coins < item.price}
                           size="sm"
                         >
-                          {isOwned ? 'Owned' : 'Purchase'}
+                          Purchase
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Coin Conversion Section */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-foreground">Coin to XP Conversion</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {SHOP_ITEMS.filter(item => item.type === 'conversion').map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Card key={item.id} className="hover:border-primary transition-colors">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Icon className="h-5 w-5 text-primary" />
+                        {item.name}
+                      </CardTitle>
+                      <CardDescription>{item.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Coins className="h-5 w-5 text-primary" />
+                          <span className="text-xl font-bold">{item.price}</span>
+                        </div>
+                        <Button 
+                          onClick={() => handlePurchase(item)}
+                          disabled={profile.coins < item.price}
+                          size="sm"
+                        >
+                          Convert
                         </Button>
                       </div>
                     </CardContent>

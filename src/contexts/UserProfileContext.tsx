@@ -9,6 +9,7 @@ export interface UserProfile {
   rank: string;
   totalFocusTime: number; // in minutes
   totalSessions: number;
+  streakFreezes: number;
 }
 
 interface UserProfileContextType {
@@ -19,6 +20,7 @@ interface UserProfileContextType {
   resetProfile: () => void;
   completeSession: (durationMinutes: number) => void;
   getActiveXPMultiplier: () => number;
+  addStreakFreeze: () => void;
 }
 
 const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);
@@ -32,6 +34,7 @@ const INITIAL_PROFILE: UserProfile = {
   rank: "Wanderer",
   totalFocusTime: 0,
   totalSessions: 0,
+  streakFreezes: 0,
 };
 
 const XP_PER_LEVEL = 100;
@@ -150,6 +153,7 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
       
       const today = new Date().toDateString();
       let newStreak = prev.streak;
+      let newStreakFreezes = prev.streakFreezes;
       
       if (prev.lastSessionDate === today) {
         // Already completed a session today
@@ -162,6 +166,10 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
         if (prev.lastSessionDate === yesterdayStr) {
           // Continuing streak
           newStreak = prev.streak + 1;
+        } else if (prev.streakFreezes > 0) {
+          // Use a streak freeze to maintain streak
+          newStreak = prev.streak;
+          newStreakFreezes = prev.streakFreezes - 1;
         } else {
           // Starting new streak
           newStreak = 1;
@@ -175,11 +183,19 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
         rank: newRank,
         coins: prev.coins + coinsEarned,
         streak: newStreak,
+        streakFreezes: newStreakFreezes,
         lastSessionDate: today,
         totalFocusTime: prev.totalFocusTime + durationMinutes,
         totalSessions: prev.totalSessions + 1,
       };
     });
+  };
+
+  const addStreakFreeze = () => {
+    setProfile((prev) => ({
+      ...prev,
+      streakFreezes: prev.streakFreezes + 1,
+    }));
   };
 
   const resetProfile = () => {
@@ -197,6 +213,7 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
         resetProfile,
         completeSession,
         getActiveXPMultiplier,
+        addStreakFreeze,
       }}
     >
       {children}
