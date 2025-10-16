@@ -8,7 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* FocusForge Dark Theme - Deep charcoal background with neon highlights */
+    /* ForgeFocus Dark Theme - Deep charcoal background with neon highlights */
     --background: 0 0% 10%;
     --foreground: 0 0% 98%;
 
@@ -72,7 +72,7 @@ All colors MUST be HSL.
   }
 }
 
-/* Custom animations for FocusForge */
+/* Custom animations for ForgeFocus */
 @keyframes glow {
   0%, 100% {
     opacity: 1;
