@@ -65,7 +65,7 @@ const Dashboard = () => {
       {/* Header with rank and avatar */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">FocusForge</h1>
+          <h1 className="text-2xl font-bold">ForgeFocus</h1>
           <Badge variant="secondary" className="mt-1">
             {profile.rank}
           </Badge>
