@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, X } from "lucide-react";
+import { Search, X, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useWallpaper } from "@/contexts/WallpaperContext";
 import {
@@ -39,7 +39,10 @@ const Memories = () => {
     return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const handleDelete = (memoryToDelete: Memory) => {
+  const handleDelete = (memoryToDelete: Memory, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     const updated = memories.filter(m => m.timestamp !== memoryToDelete.timestamp);
     setMemories(updated);
     localStorage.setItem("memories", JSON.stringify(updated));
@@ -78,7 +81,7 @@ const Memories = () => {
           {filteredMemories.map((memory, index) => (
             <Card
               key={index}
-              className="overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all bg-card/95 backdrop-blur-sm"
+              className="overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all bg-card/95 backdrop-blur-sm relative group"
               onClick={() => setSelectedMemory(memory)}
             >
               <div className="aspect-square overflow-hidden">
@@ -87,6 +90,14 @@ const Memories = () => {
                   alt={memory.taskName}
                   className="w-full h-full object-cover"
                 />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => handleDelete(memory, e)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
               <div className="p-2">
                 <p className="text-xs font-medium truncate">{memory.taskName}</p>
