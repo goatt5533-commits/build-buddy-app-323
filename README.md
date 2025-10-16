@@ -1,6 +1,6 @@
-# FocusForge
+# ForgeFocus
 
-FocusForge is a gamified productivity app that helps users stay focused, block distractions, and track their work while making productivity fun.
+ForgeFocus is a gamified productivity app that helps users stay focused, block distractions, and track their work while making productivity fun.
 
 ## Features
 - Focus sessions with customizable timers
